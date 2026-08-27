@@ -1,0 +1,492 @@
+/* Sleek Home ------------------------------------------------------------- */
+
+.workspace-leaf-content[data-type='sleek-home'] .view-content {
+	padding: 0;
+	overflow: auto;
+}
+
+body.sleek-home-hide-header
+	.workspace-leaf-content[data-type='sleek-home']
+	.view-header {
+	display: none;
+}
+
+.sleek-home {
+	--sh-accent: #8b5cf6;
+	--sh-surface: rgba(255, 255, 255, 0.06);
+	--sh-surface-hover: rgba(255, 255, 255, 0.1);
+	--sh-border: rgba(255, 255, 255, 0.1);
+	--sh-text: rgba(255, 255, 255, 0.95);
+	--sh-muted: rgba(255, 255, 255, 0.45);
+
+	--sh-top: 8vh;
+
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	width: 100%;
+	min-height: 100%;
+	background: #000;
+	isolation: isolate;
+}
+
+/* background ------------------------------------------------------------- */
+
+.sleek-home .sh-bg {
+	position: absolute;
+	inset: -4%;
+	z-index: 0;
+	background: #000;
+}
+
+.sleek-home .sh-bg.is-image {
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	transform-origin: center;
+}
+
+.sleek-home .sh-scrim {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: radial-gradient(
+		110% 70% at 50% 28%,
+		rgba(0, 0, 0, 0) 0%,
+		rgba(0, 0, 0, 0.55) 100%
+	);
+	pointer-events: none;
+}
+
+/* hero ------------------------------------------------------------------- */
+
+.sleek-home .sh-content {
+	position: relative;
+	z-index: 3;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 26px;
+	width: min(860px, 88%);
+	padding-top: var(--sh-top);
+}
+
+.sleek-home .sh-brand {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	margin-bottom: 14px;
+	user-select: none;
+}
+
+.sleek-home .sh-logo svg {
+	display: block;
+	width: 76px;
+	height: 76px;
+	filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.55));
+}
+
+.sleek-home .sh-wordmark {
+	font-size: 58px;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.03em;
+	color: var(--sh-text);
+	text-shadow: 0 2px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* search row ------------------------------------------------------------- */
+
+.sleek-home .sh-row {
+	position: relative;
+	z-index: 5;
+	display: flex;
+	align-items: stretch;
+	gap: 12px;
+	width: 100%;
+}
+
+.sleek-home .sh-search {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	height: 66px;
+	padding: 0 22px;
+	border-radius: 16px;
+	background: rgba(18, 18, 20, 0.66);
+	border: 1px solid var(--sh-border);
+	backdrop-filter: blur(22px) saturate(140%);
+	-webkit-backdrop-filter: blur(22px) saturate(140%);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+	transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.sleek-home .sh-search:focus-within {
+	border-color: color-mix(
+		in srgb,
+		var(--sh-accent) 55%,
+		rgba(255, 255, 255, 0.25)
+	);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45),
+		0 0 0 3px color-mix(in srgb, var(--sh-accent) 18%, transparent);
+}
+
+.sleek-home .sh-search-icon {
+	display: flex;
+	flex: 0 0 auto;
+	color: var(--sh-muted);
+}
+
+.sleek-home .sh-search-icon svg {
+	width: 22px;
+	height: 22px;
+}
+
+.sleek-home input.sh-input {
+	flex: 1 1 auto;
+	min-width: 0;
+	height: 100%;
+	padding: 0;
+	border: none;
+	outline: none;
+	box-shadow: none;
+	background: transparent;
+	color: var(--sh-text);
+	font-size: 20px;
+	font-family: inherit;
+}
+
+.sleek-home input.sh-input::placeholder {
+	color: var(--sh-muted);
+}
+
+.sleek-home input.sh-input:focus,
+.sleek-home input.sh-input:hover {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+}
+
+/* new note --------------------------------------------------------------- */
+
+.sleek-home button.sh-newnote {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	height: 66px;
+	padding: 0 26px;
+	border-radius: 16px;
+	border: 1px solid var(--sh-border);
+	background: rgba(18, 18, 20, 0.66);
+	backdrop-filter: blur(22px) saturate(140%);
+	-webkit-backdrop-filter: blur(22px) saturate(140%);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+	color: var(--sh-text);
+	font-size: 19px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 140ms ease, border-color 140ms ease,
+		transform 140ms ease;
+}
+
+.sleek-home button.sh-newnote:hover {
+	background: rgba(38, 38, 42, 0.78);
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.sleek-home button.sh-newnote:active {
+	transform: translateY(1px);
+}
+
+.sleek-home .sh-newnote-icon {
+	display: flex;
+	color: var(--sh-muted);
+}
+
+.sleek-home .sh-newnote-icon svg {
+	width: 20px;
+	height: 20px;
+}
+
+/* quick buttons ---------------------------------------------------------- */
+
+.sleek-home .sh-quick {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	gap: 12px;
+	align-self: flex-start;
+}
+
+.sleek-home button.sh-quick-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 52px;
+	height: 52px;
+	padding: 0;
+	border-radius: 14px;
+	border: 1px solid var(--sh-border);
+	background: rgba(18, 18, 20, 0.66);
+	backdrop-filter: blur(22px) saturate(140%);
+	-webkit-backdrop-filter: blur(22px) saturate(140%);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+	color: var(--sh-muted);
+	cursor: pointer;
+	transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.sleek-home button.sh-quick-btn:hover {
+	background: rgba(38, 38, 42, 0.78);
+	border-color: rgba(255, 255, 255, 0.18);
+	color: var(--sh-text);
+}
+
+.sleek-home button.sh-quick-btn svg {
+	width: 21px;
+	height: 21px;
+}
+
+/* results ---------------------------------------------------------------- */
+
+.sleek-home .sh-results {
+	position: absolute;
+	z-index: 3;
+	top: calc(100% + 10px);
+	left: 0;
+	right: 0;
+	max-height: 340px;
+	overflow-y: auto;
+	padding: 6px;
+	border-radius: 14px;
+	border: 1px solid var(--sh-border);
+	background: rgba(14, 14, 16, 0.94);
+	backdrop-filter: blur(28px) saturate(140%);
+	-webkit-backdrop-filter: blur(28px) saturate(140%);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.sleek-home .sh-result {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 9px 12px;
+	border-radius: 9px;
+	cursor: pointer;
+	color: var(--sh-text);
+}
+
+.sleek-home .sh-result.is-selected {
+	background: var(--sh-surface-hover);
+}
+
+.sleek-home .sh-result-icon {
+	display: flex;
+	flex: 0 0 auto;
+	color: var(--sh-muted);
+}
+
+.sleek-home .sh-result-icon svg {
+	width: 17px;
+	height: 17px;
+}
+
+.sleek-home .sh-result-text {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.sleek-home .sh-result-title {
+	font-size: 15px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.sleek-home .sh-result-sub {
+	font-size: 12px;
+	color: var(--sh-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.sleek-home .sh-result-kind {
+	flex: 0 0 auto;
+	font-size: 11px;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--sh-muted);
+}
+
+/* settings --------------------------------------------------------------- */
+
+textarea.sleek-home-textarea {
+	width: 100%;
+	min-width: 260px;
+	font-family: var(--font-monospace);
+	font-size: 13px;
+}
+
+/* small panes ------------------------------------------------------------ */
+
+@media (max-width: 700px) {
+	.sleek-home .sh-row {
+		flex-direction: column;
+	}
+
+	.sleek-home .sh-search,
+	.sleek-home button.sh-newnote {
+		height: 56px;
+	}
+
+	.sleek-home .sh-wordmark {
+		font-size: 38px;
+	}
+
+	.sleek-home .sh-logo svg {
+		width: 52px;
+		height: 52px;
+	}
+}
+
+/* line of the day -------------------------------------------------------- */
+
+.sleek-home .sh-board {
+	--sh-board-size: 640px;
+
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	width: min(860px, 88%);
+	margin-top: 44px;
+	padding-bottom: 8vh;
+}
+
+.sleek-home .sh-board-head {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: var(--sh-board-size);
+	max-width: 100%;
+}
+
+.sleek-home .sh-board-label {
+	flex: 0 0 auto;
+	font-size: 11px;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	color: var(--sh-muted);
+}
+
+.sleek-home a.sh-board-source {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	color: rgba(255, 255, 255, 0.62);
+	font-size: 13px;
+	text-decoration: none;
+}
+
+.sleek-home a.sh-board-source:hover {
+	color: var(--sh-text);
+	text-decoration: underline;
+}
+
+.sleek-home button.sh-board-reroll {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border-radius: 9px;
+	border: 1px solid var(--sh-border);
+	background: rgba(18, 18, 20, 0.66);
+	color: var(--sh-muted);
+	cursor: pointer;
+	transition: background 140ms ease, color 140ms ease;
+}
+
+.sleek-home button.sh-board-reroll:hover {
+	background: rgba(38, 38, 42, 0.78);
+	color: var(--sh-text);
+}
+
+.sleek-home button.sh-board-reroll svg {
+	width: 16px;
+	height: 16px;
+}
+
+.sleek-home .sh-board-body {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+.sleek-home .sh-board-empty {
+	color: var(--sh-muted);
+	font-size: 14px;
+	padding: 24px 0;
+}
+
+.sleek-home .sh-board-spacer {
+	flex: 1 1 auto;
+}
+
+.sleek-home button.sh-board-cta {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	width: var(--sh-board-size);
+	max-width: 100%;
+	min-height: 96px;
+	padding: 0 32px;
+	border-radius: 18px;
+	border: 1px dashed rgba(255, 255, 255, 0.16);
+	background: rgba(18, 18, 20, 0.6);
+	color: var(--sh-text);
+	font-size: 19px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 160ms ease, border-color 160ms ease,
+		transform 160ms ease;
+}
+
+.sleek-home button.sh-board-cta:hover {
+	background: rgba(38, 38, 42, 0.78);
+	border-color: color-mix(
+		in srgb,
+		var(--sh-accent) 45%,
+		rgba(255, 255, 255, 0.2)
+	);
+	border-style: solid;
+}
+
+.sleek-home button.sh-board-cta:active {
+	transform: translateY(1px);
+}
+
+.sleek-home .sh-board-cta-icon {
+	display: flex;
+	color: var(--sh-accent);
+}
+
+.sleek-home .sh-board-cta-icon svg {
+	width: 24px;
+	height: 24px;
+}

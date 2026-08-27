@@ -1,0 +1,8 @@
+node_modules
+README.md
+
+# Left to npm, which rewrites their indentation whenever a dependency changes.
+package.json
+package-lock.json
+
+data.json

@@ -1,0 +1,23 @@
+{
+  "name": "obsidian-home-page",
+  "version": "1.0.0",
+  "description": "A hero home tab for Obsidian: search, new note, and a daily chess line.",
+  "keywords": [
+    "obsidian",
+    "homepage",
+    "new-tab"
+  ],
+  "license": "GPL-3.0-or-later",
+  "author": "moise-dev",
+  "main": "main.js",
+  "scripts": {
+    "check": "node --check main.js",
+    "format": "prettier --write .",
+    "deploy": "node deploy.mjs",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
+  },
+  "devDependencies": {
+    "obsidian": "^1.13.1",
+    "prettier": "2.8.8"
+  }
+}

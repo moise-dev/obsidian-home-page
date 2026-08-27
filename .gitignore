@@ -1,0 +1,20 @@
+# vscode
+.vscode
+
+# Intellij
+*.iml
+.idea
+
+# npm
+node_modules
+
+# Exclude sourcemaps
+*.map
+
+# obsidian
+# data.json holds a vault's own settings, including the id of the line it drew
+# today. It belongs to the install, not to the source.
+data.json
+
+# Exclude macOS Finder (System Explorer) View States
+.DS_Store

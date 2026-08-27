@@ -1,0 +1,10 @@
+{
+	"id": "sleek-home",
+	"name": "Home Page",
+	"version": "1.0.0",
+	"minAppVersion": "1.13.0",
+	"description": "A hero home tab: wallpaper or pure black, a combined search and command bar, and a chess line drawn fresh each day.",
+	"author": "moise-dev",
+	"authorUrl": "https://github.com/moise-dev",
+	"isDesktopOnly": false
+}
