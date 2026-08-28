@@ -30,13 +30,13 @@ One bar for two jobs. A bare query searches note names; prefix it with `!` and i
 
 ## Line of the day
 
-If you use [Chess Repertoire](https://github.com/moise-dev/obsidian-chess-repertoire), the box below the hero draws one `chessRepertoireId` from your vault each day.
+If you use [Chess Repertoire](https://github.com/moise-dev/obsidian-chess-repertoire), the box below the hero draws one repertoire each day from the folder that plugin keeps them in — the one named in its **Storage folder** setting, wherever you have pointed it. Repertoires with no moves in them are passed over.
 
-The board is not rendered until you press **Learn Chess Position**, and the source note's name stays hidden until then — otherwise the answer is on screen before the drill starts. Once revealed, the board mounts and its Train button is pressed for you, so you land straight in study mode.
+The board is not rendered until you press **Learn Chess Position**, and the name of the line stays hidden until then — otherwise the answer is on screen before the drill starts. Once revealed, the board mounts and its Train button is pressed for you, so you land straight in study mode. Chess Repertoire then asks which side you want to drill, naming the colour the repertoire is written for as the suggestion; the drill begins once you answer.
 
 The draw is stable for the calendar day and never repeats the previous line back to back. The dice button redraws immediately, and redrawing hides the board again.
 
-Files with no code blocks are skipped using the metadata cache, so the scan does not read your whole vault.
+A note that embeds the drawn repertoire is linked from the header once the board is revealed, so you can open the line where you wrote about it; a repertoire no note embeds shows its own title instead. Finding those notes skips files with no code blocks using the metadata cache, so the scan does not read your whole vault.
 
 ## Startup behaviour
 
