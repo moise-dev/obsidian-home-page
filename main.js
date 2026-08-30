@@ -11,10 +11,21 @@ const {
 	Notice,
 	TFile,
 	MarkdownRenderer,
+	normalizePath,
 } = obsidian;
 
 const TRAIN_BUTTON = '[aria-label="Train this repertoire from its first move"]';
 const BOARD_FENCE = /```+\s*chessRepertoire\s*\n([\s\S]*?)```+/g;
+
+const CHESS_PLUGIN_ID = 'chess-repertoire';
+
+/* Where Chess Repertoire puts its repertoires when its folder setting is
+   empty, which is every vault that has not been into those settings. */
+const CHESS_FOLDER_FALLBACK = 'Chess Repertoires';
+
+/* Drill history sits beside each repertoire under the same id. It is not a
+   line, and must not be drawn as one. */
+const DRILL_SUFFIX = '.drill.json';
 
 const VIEW_TYPE = 'sleek-home';
 
@@ -123,7 +134,7 @@ class SleekHomeView extends ItemView {
 		if (url) {
 			const top = clamp(s.bgDim, 0, 1);
 			const bottom = clamp(s.bgDim + 0.18, 0, 1);
-			scrim.style.background = `linear-gradient(180deg, rgba(0,0,0,${top}) 0%, rgba(0,0,0,${bottom}) 100%)`;
+			scrim.style.background = `linear-gradient(180deg, rgba(46,52,64,${top}) 0%, rgba(46,52,64,${bottom}) 100%)`;
 		}
 
 		const content = wrap.createDiv({ cls: 'sh-content' });
@@ -376,9 +387,12 @@ class SleekHomeView extends ItemView {
 		el.empty();
 
 		if (!pick) {
+			const folder = this.plugin.chessStorageFolder();
 			el.createDiv({
 				cls: 'sh-board-empty',
-				text: 'No chessRepertoire blocks found in the vault.',
+				text: folder
+					? `No repertoires found in "${folder}".`
+					: 'No repertoires found.',
 			});
 			return;
 		}
@@ -386,17 +400,27 @@ class SleekHomeView extends ItemView {
 		const head = el.createDiv({ cls: 'sh-board-head' });
 		head.createSpan({ cls: 'sh-board-label', text: 'Line of the day' });
 
-		/* The note's name gives the line away, so it only appears once the board does. */
+		/* The name gives the line away, so it only appears once the board does.
+       A repertoire no note has written about has only its own title to go by,
+       and nowhere to be opened. */
 		if (this._revealed) {
-			const source = head.createEl('a', {
-				cls: 'sh-board-source',
-				text: pick.path.split('/').pop().replace(/\.md$/, ''),
-				attr: { href: '#' },
-			});
-			source.addEventListener('click', (e) => {
-				e.preventDefault();
-				this.app.workspace.openLinkText(pick.path, '', false);
-			});
+			const label = pick.path
+				? pick.path.split('/').pop().replace(/\.md$/, '')
+				: pick.title || pick.id;
+
+			if (pick.path) {
+				const source = head.createEl('a', {
+					cls: 'sh-board-source',
+					text: label,
+					attr: { href: '#' },
+				});
+				source.addEventListener('click', (e) => {
+					e.preventDefault();
+					this.app.workspace.openLinkText(pick.path, '', false);
+				});
+			} else {
+				head.createSpan({ cls: 'sh-board-source', text: label });
+			}
 		}
 
 		head.createDiv({ cls: 'sh-board-spacer' });
@@ -434,11 +458,15 @@ class SleekHomeView extends ItemView {
 			'```',
 		].join('\n');
 
+		/* Only used to resolve links out of the block; the repertoire file stands
+       in when no note embeds this line. */
+		const sourcePath = pick.path || pick.file || '';
+
 		try {
 			if (typeof MarkdownRenderer.render === 'function') {
-				await MarkdownRenderer.render(this.app, md, body, pick.path, this);
+				await MarkdownRenderer.render(this.app, md, body, sourcePath, this);
 			} else {
-				await MarkdownRenderer.renderMarkdown(md, body, pick.path, this);
+				await MarkdownRenderer.renderMarkdown(md, body, sourcePath, this);
 			}
 		} catch (err) {
 			console.error('Sleek Home: could not render the daily board', err);
@@ -584,12 +612,102 @@ module.exports = class SleekHomePlugin extends Plugin {
 		});
 	}
 
-	/* Every markdown file that carries at least one chessRepertoire block.
-     The metadata cache tells us which files have code blocks at all, so most
-     of the vault never gets read. */
+	/* The vault folder Chess Repertoire keeps its repertoires in.
+     Since that plugin's 1.3.0 the folder is one of its settings, so it is asked
+     for rather than assumed: `storagePath` is the folder in force right now,
+     the setting behind it is the fallback, and a plugin too old to have either
+     still keeps its files inside its own folder. */
+	chessStorageFolder() {
+		const chess = this.app.plugins.getPlugin(CHESS_PLUGIN_ID);
+		if (!chess) return null;
+
+		if (typeof chess.storagePath === 'string' && chess.storagePath.trim())
+			return normalizePath(chess.storagePath.trim());
+
+		if (chess.settings && typeof chess.settings.storageFolder === 'string')
+			return normalizePath(
+				chess.settings.storageFolder.trim() || CHESS_FOLDER_FALLBACK
+			);
+
+		return normalizePath(
+			`${this.app.vault.configDir}/plugins/${CHESS_PLUGIN_ID}/storage`
+		);
+	}
+
+	/* Every repertoire on disk, with the note that embeds it where there is one.
+     The folder is the source of truth rather than the notes: a repertoire is a
+     file there whether or not a block anywhere points at it, and an id in a
+     block whose file has gone is not a line that can be drawn. */
 	async scanBoards() {
+		const folder = this.chessStorageFolder();
+		if (!folder) return [];
+
+		const adapter = this.app.vault.adapter;
+
+		let listing;
+		try {
+			if (!(await adapter.exists(folder))) return [];
+			listing = await adapter.list(folder);
+		} catch (err) {
+			console.error(`Sleek Home: could not read "${folder}"`, err);
+			return [];
+		}
+
+		const notes = await this.scanNotes();
 		const boards = [];
-		const seen = new Set();
+
+		for (const file of listing.files) {
+			if (!file.endsWith('.json') || file.endsWith(DRILL_SUFFIX)) continue;
+
+			const board = await this.readBoard(file);
+
+			/* A repertoire with no moves in it is a board with nothing to learn,
+         and every folder collects a few: one is created the moment a block is
+         inserted, and the ones never filled in stay behind. */
+			if (!board) continue;
+
+			boards.push({ ...board, path: notes.get(board.id) || null });
+		}
+
+		return boards;
+	}
+
+	/* One repertoire file, or nothing when it cannot be read or holds no moves.
+     Unreadable is not worth reporting: the plugin says so itself, loudly, the
+     moment such a line is drawn. */
+	async readBoard(file) {
+		const id = file
+			.split('/')
+			.pop()
+			.replace(/\.json$/, '');
+
+		let data;
+		try {
+			data = JSON.parse(await this.app.vault.adapter.read(file));
+		} catch (err) {
+			return null;
+		}
+
+		if (!data || typeof data !== 'object') return null;
+
+		const moves = Array.isArray(data.moves) ? data.moves.length : 0;
+		const roots = Array.isArray(data.rootVariants) ? data.rootVariants.length : 0;
+		if (!moves && !roots) return null;
+
+		const title = data.header && data.header.title;
+
+		return {
+			id,
+			file,
+			title: typeof title === 'string' && title.trim() ? title.trim() : null,
+		};
+	}
+
+	/* Which note embeds each repertoire, so a drawn line can be opened where it
+     was written about. The metadata cache tells us which files have code blocks
+     at all, so most of the vault never gets read. */
+	async scanNotes() {
+		const notes = new Map();
 
 		for (const file of this.app.vault.getMarkdownFiles()) {
 			const cache = this.app.metadataCache.getFileCache(file);
@@ -607,18 +725,36 @@ module.exports = class SleekHomePlugin extends Plugin {
 			let match;
 			while ((match = BOARD_FENCE.exec(text)) !== null) {
 				const id = (match[1].match(/chessRepertoireId:\s*(\S+)/) || [])[1];
-				if (!id || seen.has(id)) continue;
-				seen.add(id);
-				boards.push({ id, path: file.path });
+				if (id && !notes.has(id)) notes.set(id, file.path);
 			}
 		}
-		return boards;
+		return notes;
+	}
+
+	/* Whether a draw still has a file behind it. Cheaper than a rescan, which is
+     the point: this runs on every render of the home tab. */
+	async boardExists(pick) {
+		const folder = this.chessStorageFolder();
+		const file = pick.file || (folder ? `${folder}/${pick.id}.json` : null);
+		if (!file) return false;
+
+		try {
+			return await this.app.vault.adapter.exists(file);
+		} catch (err) {
+			return false;
+		}
 	}
 
 	async pickDailyBoard(force) {
 		const today = new Date().toLocaleDateString('en-CA');
 		const current = this.settings.dailyBoard;
-		if (!force && current && current.date === today && current.id) return current;
+
+		/* Today's draw stands only while its file is still there. Repertoires get
+       deleted, and moving the folder used to strand every id we had cached; a
+       stale one renders as the plugin's error rather than as a board. */
+		if (!force && current && current.date === today && current.id) {
+			if (await this.boardExists(current)) return current;
+		}
 
 		const boards = await this.scanBoards();
 		if (!boards.length) return null;
@@ -630,7 +766,13 @@ module.exports = class SleekHomePlugin extends Plugin {
 		}
 
 		const pick = pool[Math.floor(Math.random() * pool.length)];
-		this.settings.dailyBoard = { date: today, id: pick.id, path: pick.path };
+		this.settings.dailyBoard = {
+			date: today,
+			id: pick.id,
+			file: pick.file,
+			path: pick.path,
+			title: pick.title,
+		};
 		await this.saveData(this.settings);
 		return this.settings.dailyBoard;
 	}
@@ -814,7 +956,7 @@ class SleekHomeSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Show a daily board')
 			.setDesc(
-				'Draws one chessRepertoire block from the vault each day and puts it below the hero.'
+				"Draws one line from the Chess Repertoire plugin's folder each day and puts it below the hero."
 			)
 			.addToggle((t) =>
 				t.setValue(s.showBoard).onChange((v) => set('showBoard', v))
@@ -846,7 +988,9 @@ class SleekHomeSettingTab extends PluginSettingTab {
 			.setName('Draw a new line now')
 			.setDesc(
 				s.dailyBoard && s.dailyBoard.id
-					? `Currently showing ${s.dailyBoard.path} (drawn ${s.dailyBoard.date}).`
+					? `Currently showing ${
+							s.dailyBoard.path || s.dailyBoard.title || s.dailyBoard.id
+					  } (drawn ${s.dailyBoard.date}).`
 					: 'Nothing drawn yet.'
 			)
 			.addButton((b) =>
