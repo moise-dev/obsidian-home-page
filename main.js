@@ -134,7 +134,7 @@ class SleekHomeView extends ItemView {
 		if (url) {
 			const top = clamp(s.bgDim, 0, 1);
 			const bottom = clamp(s.bgDim + 0.18, 0, 1);
-			scrim.style.background = `linear-gradient(180deg, rgba(0,0,0,${top}) 0%, rgba(0,0,0,${bottom}) 100%)`;
+			scrim.style.background = `linear-gradient(180deg, rgba(46,52,64,${top}) 0%, rgba(46,52,64,${bottom}) 100%)`;
 		}
 
 		const content = wrap.createDiv({ cls: 'sh-content' });
