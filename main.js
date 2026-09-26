@@ -398,29 +398,26 @@ class SleekHomeView extends ItemView {
 		}
 
 		const head = el.createDiv({ cls: 'sh-board-head' });
-		head.createSpan({ cls: 'sh-board-label', text: 'Line of the day' });
+		head.createSpan({ cls: 'sh-board-label', text: 'Line of the day:' });
 
-		/* The name gives the line away, so it only appears once the board does.
-       A repertoire no note has written about has only its own title to go by,
+		/* A repertoire no note has written about has only its own title to go by,
        and nowhere to be opened. */
-		if (this._revealed) {
-			const label = pick.path
-				? pick.path.split('/').pop().replace(/\.md$/, '')
-				: pick.title || pick.id;
+		const label = pick.path
+			? pick.path.split('/').pop().replace(/\.md$/, '')
+			: pick.title || pick.id;
 
-			if (pick.path) {
-				const source = head.createEl('a', {
-					cls: 'sh-board-source',
-					text: label,
-					attr: { href: '#' },
-				});
-				source.addEventListener('click', (e) => {
-					e.preventDefault();
-					this.app.workspace.openLinkText(pick.path, '', false);
-				});
-			} else {
-				head.createSpan({ cls: 'sh-board-source', text: label });
-			}
+		if (pick.path) {
+			const source = head.createEl('a', {
+				cls: 'sh-board-source',
+				text: label,
+				attr: { href: '#' },
+			});
+			source.addEventListener('click', (e) => {
+				e.preventDefault();
+				this.app.workspace.openLinkText(pick.path, '', false);
+			});
+		} else {
+			head.createSpan({ cls: 'sh-board-source', text: label });
 		}
 
 		head.createDiv({ cls: 'sh-board-spacer' });

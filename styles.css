@@ -393,7 +393,7 @@ textarea.sleek-home-textarea {
 .sleek-home .sh-board-head {
 	display: flex;
 	align-items: center;
-	gap: 14px;
+	gap: 7px;
 	width: var(--sh-board-size);
 	max-width: 100%;
 }
